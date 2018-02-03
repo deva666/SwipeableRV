@@ -3,9 +3,10 @@ package io.huannguyen.swipeablerv.demo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import io.huannguyen.swipeablerv.adapter.StandardSWAdapter;
 
 import java.util.List;
+
+import io.huannguyen.swipeablerv.adapter.StandardSWAdapter;
 
 /**
  * Created by huannguyen
@@ -32,4 +33,5 @@ public class SampleAdapter extends StandardSWAdapter<String, SampleViewHolder> {
     public int getItemCount() {
         return mItems == null? 0: mItems.size();
     }
+    
 }

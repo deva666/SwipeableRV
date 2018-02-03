@@ -164,4 +164,14 @@ public abstract class DelegateSWAdapter<TItem, TViewHolder extends ViewHolder> e
     public void setSnackBarDataProvider(SWSnackBarDataProvider snackBarDataProvider) {
         mSnackBarDataProvider = snackBarDataProvider;
     }
+    
+    @Override
+    public boolean canSwipeLeft(int position) {
+        return true;
+    }
+    
+    @Override
+    public boolean canSwipeRight(int position) {
+        return true;
+    }
 }

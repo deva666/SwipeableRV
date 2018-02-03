@@ -7,12 +7,13 @@ import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
+
+import java.util.List;
+
 import io.huannguyen.swipeablerv.R;
 import io.huannguyen.swipeablerv.SWItemRemovalListener;
 import io.huannguyen.swipeablerv.SWSnackBarDataProvider;
 import io.huannguyen.swipeablerv.utils.ResourceUtils;
-
-import java.util.List;
 
 /**
  * Created by huannguyen
@@ -147,5 +148,15 @@ public abstract class StandardSWAdapter<TItem, TViewHolder extends ViewHolder> e
     @Override
     public void setSnackBarDataProvider(SWSnackBarDataProvider snackBarDataProvider) {
         mSnackBarDataProvider = snackBarDataProvider;
+    }
+    
+    @Override
+    public boolean canSwipeLeft(int position) {
+        return true;
+    }
+    
+    @Override
+    public boolean canSwipeRight(int position) {
+        return true;
     }
 }

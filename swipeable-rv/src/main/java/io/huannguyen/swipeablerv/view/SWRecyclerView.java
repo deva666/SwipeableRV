@@ -1,16 +1,23 @@
 package io.huannguyen.swipeablerv.view;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
+import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback;
@@ -364,22 +371,40 @@ public class SWRecyclerView
 
     private void initResources() {
         if (mLTRSwipeIconRes != 0) {
-            mLTRSwipeIcon = ResourceUtils
-                    .createBitmap(getResources(), mLTRSwipeIconRes, mLTRSwipeIconColor, mSwipeIconHeight,
-                                  mSwipeIconWidth);
+            mLTRSwipeIcon = getBitmap(getContext(), mLTRSwipeIconRes);
         }
 
         if (mRTLSwipeIconRes != 0) {
             if (mRTLSwipeIconRes == mLTRSwipeIconRes && mLTRSwipeIconColor == mRTLSwipeIconColor) {
                 mRTLSwipeIcon = mLTRSwipeIcon;
             } else {
-                mRTLSwipeIcon = ResourceUtils.createBitmap(getResources(), mRTLSwipeIconRes,
-                                                           mRTLSwipeIconColor, mSwipeIconHeight, mSwipeIconWidth);
+                mRTLSwipeIcon = getBitmap(getContext(), mRTLSwipeIconRes);
             }
         }
 
         createLTRSwipeMessageBitmap();
         createRTLSwipeMessageBitmap();
+    }
+    
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private static Bitmap getBitmap(VectorDrawable vectorDrawable) {
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
+                vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        vectorDrawable.draw(canvas);
+        return bitmap;
+    }
+    
+    private static Bitmap getBitmap(Context context, int drawableId) {
+        Drawable drawable = ContextCompat.getDrawable(context, drawableId);
+        if (drawable instanceof BitmapDrawable) {
+            return BitmapFactory.decodeResource(context.getResources(), drawableId);
+        } else if (drawable instanceof VectorDrawable) {
+            return getBitmap((VectorDrawable) drawable);
+        } else {
+            throw new IllegalArgumentException("unsupported drawable type");
+        }
     }
 
     /**
@@ -409,6 +434,25 @@ public class SWRecyclerView
         adapter.setSnackBarDataProvider(snackBarDataProvider);
         ItemTouchHelper.Callback callback = new SimpleCallback(0, swipeDirection) {
             @Override
+            public int getMovementFlags(RecyclerView recyclerView, ViewHolder viewHolder) {
+                SWAdapter<?,?> swAdapter = (SWAdapter<?,?>)recyclerView.getAdapter();
+                int position = viewHolder.getAdapterPosition();
+                boolean canSwipeLeft = swAdapter.canSwipeLeft(position);
+                boolean canSwipeRight = swAdapter.canSwipeRight(position);
+                int directionFlags;
+                if (canSwipeLeft && canSwipeRight) {
+                    directionFlags = ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
+                } else if (canSwipeLeft) {
+                    directionFlags = ItemTouchHelper.LEFT;
+                } else if (canSwipeRight) {
+                    directionFlags = ItemTouchHelper.RIGHT;
+                } else {
+                    directionFlags = 0;
+                }
+                return makeMovementFlags(0, directionFlags);
+            }
+    
+            @Override
             public boolean onMove(RecyclerView recyclerView, ViewHolder viewHolder, ViewHolder
                     target) {
                 return false;
@@ -433,7 +477,7 @@ public class SWRecyclerView
                     viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState,
                                   isCurrentlyActive);
-
+                
                 if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
                     View itemView = viewHolder.itemView;
                     float height = (float) (itemView.getBottom() - itemView.getTop());

@@ -95,4 +95,8 @@ public interface SWAdapter<TItem, TViewHolder extends ViewHolder> {
     SWItemRemovalListener getItemRemovalListener();
 
     void setItemRemovalListener(SWItemRemovalListener<TItem> SWItemRemovalListener);
+    
+    boolean canSwipeLeft(int position);
+    
+    boolean canSwipeRight(int position);
 }
